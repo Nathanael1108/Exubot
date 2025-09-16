@@ -46,7 +46,7 @@ intents.guilds = True
 intents.guild_messages = True
 intents.members = True #Pour avoir accès à la liste des membres
 intents.presences = True #Voir les status des membres
-intents.threads = True  # 🔥 Ce flag est important
+#intents.threads = True  # 🔥 Ce flag est important
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 ########################################
