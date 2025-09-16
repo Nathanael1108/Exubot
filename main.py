@@ -1,0 +1,448 @@
+#################################
+############ EXUBOT #############
+######### Version 0.2 ###########
+###### Maintenue par Nate #######
+#################################
+
+#################################
+###### IMPORT DES MODULES #######
+#################################
+
+import os
+import discord
+from discord.ext import commands
+from discord import app_commands
+import requests
+from datetime import datetime, timedelta
+from keep_alive import keep_alive
+from fpdf import FPDF
+import io
+
+keep_alive()  #Lance le serveur web pour maintenir le bot actif
+
+##############################
+###### NOMS DIRECTIONS #######
+##############################
+
+dir = "Emile"
+codir = "Xavier"
+gestionbot = "Nathanael"
+secretaire = "Nathanael"
+dirphoto = "Julia"
+codirphoto = "Valentine"
+dirjournal = "Jordan"
+codirjournal = "Alan"
+dirprod = "Akram"
+dirDJ = "Briac"
+codirDJ = "Alban"
+
+#############################
+###### INITIALISATION #######
+#############################
+
+intents = discord.Intents.default()
+intents.message_content = True
+intents.guilds = True
+intents.guild_messages = True
+intents.members = True #Pour avoir accès à la liste des membres
+intents.presences = True #Voir les status des membres
+intents.threads = True  # 🔥 Ce flag est important
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+########################################
+###### DICTIONNAIRE JOURS / MOIS #######
+########################################
+
+jours_fr = [
+    'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'
+]
+mois_fr = [
+    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août',
+    'Septembre', 'Octobre', 'Novembre', 'Décembre'
+]
+
+###############################
+###### COMMANDES DU BOT #######
+###############################
+
+###########################
+###### TEST DE BASE #######
+###########################
+
+
+@bot.command(help="Dit bonjour au monde.",
+             description="Dit bonjour au monde poliment.")
+async def hello(ctx):
+  await ctx.send(f"Hello, world! {ctx.author}")
+
+
+########################################
+###### OBTENTION DATE NEXT JEUDI #######
+########################################
+
+
+def get_next_thursday_fr():
+  today = datetime.today()
+  days_ahead = (3 - today.weekday() + 7) % 7
+  if days_ahead == 0:
+    days_ahead = 7  # On saute au jeudi suivant si on est jeudi
+  next_thursday = today + timedelta(days=days_ahead)
+  jour = jours_fr[next_thursday.weekday()]
+  jour_num = next_thursday.day
+  mois = mois_fr[next_thursday.month - 1]
+
+  return f"{jour} {jour_num} {mois}"
+
+
+###############################################
+###### CREATION D'ANNONCE ORDRE DU JOUR #######
+###############################################
+
+
+class OdjView(discord.ui.View):
+
+  def __init__(self):
+    super().__init__(timeout=None)
+
+  @discord.ui.button(label="📋 Voir l'ordre du jour",
+                     style=discord.ButtonStyle.primary)
+  async def show_odj(self, interaction: discord.Interaction,
+                     button: discord.ui.Button):
+    url = "https://mensuel.framapad.org/p/q13ZD0X0OO7ySG6xc5q8/export/txt"
+    response = requests.get(url)
+
+    if response.status_code != 200:
+      await interaction.response.send_message(
+          "❌ Impossible de récupérer l'ordre du jour.", ephemeral=True)
+      return
+
+    content = response.text
+    lines = content.splitlines()
+
+    inside_block = False
+    extracted_lines = []
+
+    for line in lines:
+      if "—————BEGIN——————" in line:
+        inside_block = True
+        continue
+      elif "—————STOP——————" in line:
+        break
+      if inside_block:
+        extracted_lines.append(line)
+
+    # Affichage du texte
+    extracted_text = "\n".join(extracted_lines).strip()
+    if len(extracted_text) > 1900:
+      extracted_text = extracted_text[:1900]
+
+    first_line = lines[0] if len(lines) > 0 else ""
+    message = f"*{first_line}**\n{extracted_text}"
+
+    await interaction.response.send_message(content=f'''📄 **Ordre du jour :**
+**➡️ Pour ajouter un point :** [Clique ici](https://mensuel.framapad.org/p/q13ZD0X0OO7ySG6xc5q8)
+```{message}```''',
+                                            ephemeral=True)
+
+
+# Commande classique avec bouton
+@bot.command()
+async def odj(ctx):
+  await ctx.message.delete()
+  jeudi = get_next_thursday_fr()
+
+  msg = await ctx.send(f"""Bonjour tout le monde :
+
+🚨 **Réunion hebdomadaire** 🚨  
+📆 **Date :** {jeudi}   
+🕙 **Heure :** 17h    
+📍 **Salle :** Salle de verre / Salle AEETS / Autres (Selon dispo)  
+👥 : @everyone  
+📝 Ordre du jour : Cliquez sur le bouton ci-dessous.  
+Réagissez avec ✅ si vous serez présent, ❌ si non présent et 💻 si à distance.
+**Note :** La réunion est maintenue si au moins 3 personnes sont présentes.\n  
+Passez une agréable journée ☀️""",
+                       view=OdjView())
+
+  # Ajout des réactions
+  await msg.add_reaction("✅")
+  await msg.add_reaction("❌")
+  await msg.add_reaction("💻")
+
+
+######################################
+###### SONDAGE DISPO RENCONTRE #######
+######################################
+
+
+@bot.command()
+async def dispo(ctx):
+  await ctx.message.delete()
+  options = [
+      "1️⃣ Lundi - 17h", "2️⃣ Mardi - 17h", "3️⃣ Mercredi - 17h",
+      "4️⃣ Jeudi - 17h", "5️⃣ Vendredi - 17h", "6️⃣ Week-end - À définir"
+  ]
+
+  # Crée le message du sondage
+  description = "\n".join(options)
+  embed = discord.Embed(title="📅 Sondage - Quel jour pour les rencontres ?",
+                        description=description,
+                        color=discord.Color.red())
+  embed.set_footer(text="Reagis avec le choix correspondant.")
+
+  message = await ctx.send(embed=embed)
+
+  # Ajoute les réactions correspondantes
+  emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"]
+  for emoji in emojis:
+    await message.add_reaction(emoji)
+
+
+###########################
+###### INFO DU CLUB #######
+###########################
+
+
+@bot.tree.command(name="info", description="Affiche les informations du club")
+async def info(interaction: discord.Interaction):
+  description = (f"⚓ **Capitaine de club** : {dir}\n"
+                 f"🧭 **Co-capitaine** : {codir}\n"
+                 f"📝 **Secrétaire / assistant direction** : {secretaire}\n"
+                 f"📷 **Directrice photo** : {dirphoto}\n"
+                 f"🤳 **Co-directrice photo** : {codirphoto}\n"
+                 f"🎛️ **Directeur DJ** : {dirDJ}\n"
+                 f"🎚️ **Co-directeur DJ** : {codirDJ}\n"
+                 f"🗞️ **Directeur journal** : {dirjournal}\n"
+                 f"📰 **Co-directeur journal** : {codirjournal}\n"
+                 f"💽 **Directeur production** : {dirprod}\n\n"
+                 "🎙️ Le pôle podcast est en standby.\n"
+                 "📢 Communication auto-gérée entre pôles.")
+
+  footer_text = f"❓ Pour toutes questions, demande sur le #general ou ping @{gestionbot}. Merci!"
+
+  embed = discord.Embed(title="📣 Informations du club",
+                        description=description,
+                        color=discord.Color.gold())
+  embed.set_footer(text=footer_text)
+
+  # Envoi éphémère (visible uniquement par l'utilisateur)
+  await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+######################################################
+###### COMMANDES POUR LE RESUME DE REUNION ###########
+######################################################
+
+
+@bot.tree.command(name="resreu", description="Affiche le résumé de la réunion")
+async def resume(interaction: discord.Interaction):
+  url = "https://mensuel.framapad.org/p/q13ZD0X0OO7ySG6xc5q8/export/txt"
+  response = requests.get(url)
+
+  if response.status_code != 200:
+    await interaction.response.send_message(
+        "❌ Impossible de récupérer le pad.", ephemeral=True)
+    return
+
+  content = response.text
+  lines = content.splitlines()
+
+  # Extraire les lignes entre les balises
+  inside_block = False
+  extracted_lines = []
+
+  for line in lines:
+    if "—————DEBUT——————" in line:
+      inside_block = True
+      continue
+    elif "—————FIN——————" in line:
+      break
+    if inside_block:
+      extracted_lines.append(line)
+
+  extracted_text = "\n".join(extracted_lines).strip()
+
+  # Tronquer si trop long
+  if len(extracted_text) > 1900:
+    extracted_text = extracted_text[:1900]
+
+  message = f"**📝 Texte à copier coller :**\n```{extracted_text}```"
+
+  await interaction.response.send_message(content=message, ephemeral=True)
+  await interaction.followup.send(
+      content=
+      '''**Prompt ChatGPT :** `Dans le but de clarifier les communications, je souhaite faire de beau compte rendu de réunion. Mets en forme mes notes sous la forme d'un compte rendu de réunion propre et clair. Fournis moi ton travail en markdown sans aucun marqueur de formatage. Voici l'ordre du jour "Coller l'ordre du jour ici" et ma prise de note : "Coller le texte du résumé ici"`''',
+      ephemeral=True)
+
+
+##########################################
+###### FONCTIONS RAPPELS PÔLES ###########
+##########################################
+'''#Rappels template
+@bot.command()
+async def rappel(ctx):
+  await ctx.message.delete()
+
+  await ctx.send("""**Rappel Role**  
+@Role 
+Salut tout le monde, [SAISIR TEXTE ICI]!
+[SAISIR TEXTE ICI]
+Merci à tous pour votre participation 🙌""")'''
+
+
+#Rappels depots photos
+@bot.command()
+async def rappelphoto(ctx):
+  await ctx.message.delete()
+
+  await ctx.send("""📸 **Rappel Photo**  
+@Photo/Vidéo  
+Salut tout le monde !
+
+🗓️ **Pensez à déposer vos photos de votre dernière prestation** dans le dossier prévu.  
+
+📁 **Lien du Sharepoint :** [Sharepoint](https://aeets0.sharepoint.com/sites/exutoire/Documents%20partages/Forms/AllItems.aspx?id=%2Fsites%2Fexutoire%2FDocuments%20partages%2FPhotos%2FEvenements&viewid=cada9721%2D109e%2D443b%2Dbabb%2D578be683514b)  
+🕐 **Deadline :** Deux semaines max après la fin de l'évenement!
+
+Merci à tous pour votre participation 🙌""")
+
+
+#Rappels dj
+@bot.command()
+async def rappeldj(ctx):
+  await ctx.message.delete()
+
+  await ctx.send("""🎛️ **Rappel DJ**  
+@DJ 
+Salut tout le monde, on a un party de prévu bientôt!
+**Si t'es dispo**, réagis avec ✅ sur l'événement correspondant dans #évènements-à-venir.
+Merci à tous pour votre participation 🙌""")
+
+
+@bot.command()
+async def rappelreu(ctx):
+  await ctx.message.delete()
+
+  await ctx.send("""⚠️**==[Rappel reunion]==**⚠️\n
+@everyone 
+Salut tout le monde, pour rappel rencontre de club ce **jeudi à 17h.**
+Si tu l'as pas déjà fait, hésites pas à réagir au message :arrow_up: 
+Merci à tous pour votre participation 🙌""")
+
+
+############################################
+###### FONCTIONS POLES PROD / DJ ###########
+############################################
+
+
+#Publication de set
+@bot.tree.command(name="partageset",
+                  description="Publie un nouveau set avec un lien")
+@app_commands.describe(url="Lien vers le set à partager")
+async def partageset(interaction: discord.Interaction, url: str):
+  user = interaction.user.mention
+  await interaction.response.send_message(
+      f"{user} a publié un nouveau set! 🎧 Tu peux le retrouver ici: {url} \nEnjoy!"
+  )
+
+
+#Publication de son
+@bot.tree.command(name="partageson",
+                  description="Publie un nouveau son avec un lien")
+@app_commands.describe(url="Lien vers le son à partager")
+async def partageson(interaction: discord.Interaction, url: str):
+  user = interaction.user.mention
+  await interaction.response.send_message(
+      f"{user} a publié un nouveau son! 🎵 Tu peux le retrouver ici: {url} \nEnjoy!"
+  )
+
+
+###########################################
+###### SURVEILLANCE DES EMPRUNTS ##########
+###########################################
+
+@bot.event
+async def on_message(message):
+    # Ignore les messages du bot
+    if message.author == bot.user:
+        return
+
+    # Vérifie si le message est dans un thread rattaché à un forum
+    if isinstance(message.channel, discord.Thread):
+        parent = message.channel.parent
+        if parent and parent.name == "emprunt-test":
+            await parent.send(f"📣 Nouveau message dans le post **{message.channel.name}** par {message.author.mention} !")
+
+    await bot.process_commands(message)
+
+
+##########################################
+###### CREATION PDF RESUME REUNION #######
+##########################################
+
+
+# Modal personnalisé pour saisir le texte
+class PdfModal(discord.ui.Modal, title="Texte pour PDF"):
+  texte = discord.ui.TextInput(
+      label="Écris ton texte ici",
+      style=discord.TextStyle.paragraph,  # multi-lignes
+      placeholder="Tape ton texte...",
+      max_length=4000,
+      required=True)
+
+  def __init__(self, interaction):
+    super().__init__()
+    self.interaction = interaction
+
+  async def on_submit(self, interaction: discord.Interaction):
+    # Nettoyage simple des caractères spéciaux
+    texte_nettoye = self.texte.value.replace("’",
+                                             "'").replace("–", "-").replace(
+                                                 "“", '"').replace("”", '"')
+
+    # Création PDF
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_font("Arial", size=12)
+
+    for line in texte_nettoye.splitlines():
+      pdf.multi_cell(0, 10, line)
+
+    pdf_bytes = io.BytesIO()
+    pdf_data = pdf.output(dest='S').encode('latin1')
+    pdf_bytes.write(pdf_data)
+    pdf_bytes.seek(0)
+
+    #Nom du fichier
+    Nomfich = "Resume_de_la_reunion_precedente.pdf"
+
+    await interaction.response.send_message(content="📄 Voici ton PDF :",
+                                            file=discord.File(
+                                                pdf_bytes, filename=Nomfich),
+                                            ephemeral=True)
+
+
+# Commande slash qui appelle le modal
+@bot.tree.command(
+    name="makepdf",
+    description="Crée un PDF à partir d'un texte via un formulaire")
+async def makepdf(interaction: discord.Interaction):
+  modal = PdfModal(interaction)
+  await interaction.response.send_modal(modal)
+
+
+##NE PAS SUPPRIMER##
+
+
+@bot.event
+async def on_ready():
+  print(f"Bot prêt - connecté en tant que {bot.user}")
+  # Synchronise les commandes slash globalement
+  await bot.tree.sync()
+  print("Commandes slash synchronisées")
+
+
+#Appel et démarrage du bot
+token = os.environ['TOKEN_BOT']
+bot.run(token)
