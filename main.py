@@ -1,8 +1,8 @@
-#################################
-############ EXUBOT #############
-######### Version 0.3 ###########
-###### Maintenue par Nate #######
-#################################
+##################################
+############ EXUBOT ##############
+######### Version 0.3a ###########
+###### Maintenue par Nate ########
+##################################
 
 #################################
 ###### IMPORT DES MODULES #######
@@ -235,10 +235,13 @@ async def info(interaction: discord.Interaction):
 
 lien_mess = "https://www.google.com/" #mettre le bon lien ICI
 
-@bot.command(help="Donne l'invit du messenger.",
-             description="Le lien est donné en brut.")
-async def messenger(ctx):
-  await ctx.send(f"Voila le lien du Messenger: {lien_mess}")
+# Slash commande qui envoie un lien en ephemeral
+@bot.tree.command(name="messenger", description="Donne l'invit du messenger en privé (ephemeral).")
+async def messenger(interaction: discord.Interaction):
+    await interaction.response.send_message(
+        f"Voilà le lien du Messenger : {lien_mess}",
+        ephemeral=True
+    )
 
 ######################################################
 ###### COMMANDES POUR LE RESUME DE REUNION ###########
