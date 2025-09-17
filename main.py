@@ -1,8 +1,8 @@
-##################################
-############ EXUBOT ##############
-######### Version 0.2b ###########
-###### Maintenue par Nate ########
-##################################
+#################################
+############ EXUBOT #############
+######### Version 0.3 ###########
+###### Maintenue par Nate #######
+#################################
 
 #################################
 ###### IMPORT DES MODULES #######
@@ -231,6 +231,14 @@ async def info(interaction: discord.Interaction):
   # Envoi éphémère (visible uniquement par l'utilisateur)
   await interaction.response.send_message(embed=embed, ephemeral=True)
 
+#Fonction du lien d'invit du messenger
+
+lien_mess = "https://www.google.com/" #mettre le bon lien ICI
+
+@bot.command(help="Donne l'invit du messenger.",
+             description="Le lien est donné en brut.")
+async def messenger(ctx):
+  await ctx.send(f"Voila le lien du Messenger: {lien_mess}")
 
 ######################################################
 ###### COMMANDES POUR LE RESUME DE REUNION ###########
