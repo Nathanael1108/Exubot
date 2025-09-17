@@ -1,8 +1,8 @@
-##################################
-############ EXUBOT ##############
-######### Version 0.3a ###########
-###### Maintenue par Nate ########
-##################################
+#################################
+############ EXUBOT #############
+######### Version 0.4 ###########
+###### Maintenue par Nate #######
+#################################
 
 #################################
 ###### IMPORT DES MODULES #######
@@ -75,6 +75,35 @@ mois_fr = [
 async def hello(ctx):
   await ctx.send(f"Hello, world! {ctx.author}")
 
+###########################
+###### PRESENTATION #######
+###########################
+
+@bot.command(name="presentation", help="Le bot se présente.")
+async def presentation(ctx):
+    # Supprime le message de commande
+    await ctx.message.delete()
+
+    embed = discord.Embed(
+        title="🤖 Présentation d'Exubot",
+        description=(
+            "Salut, moi c'est **Exubot**! Enchanté de te rencontrer.\n\n"
+            "Tu me verras souvent parler car j'adore ça! Mais en bref, "
+            "je suis là comme larbin pour votre secrétaire (Grrrr...) "
+            "et faire une partie du travail à sa place :)\n\n"
+            "Si tu as besoin de quoi que ce soit, contacte mon créateur 👉 @Secrétaire.\n\n"
+            "Merci!"
+        ),
+        color=discord.Color.blurple()
+    )
+
+    # Ajout de l’avatar du bot en miniature
+    if bot.user.avatar:
+        embed.set_thumbnail(url=bot.user.avatar.url)
+
+    embed.set_footer(text="Ton assistant préféré ✨")
+
+    await ctx.send(embed=embed)
 
 ########################################
 ###### OBTENTION DATE NEXT JEUDI #######
