@@ -1,8 +1,8 @@
-#################################
-############ EXUBOT #############
-######### Version 0.2 ###########
-###### Maintenue par Nate #######
-#################################
+##################################
+############ EXUBOT ##############
+######### Version 0.2b ###########
+###### Maintenue par Nate ########
+##################################
 
 #################################
 ###### IMPORT DES MODULES #######
@@ -26,14 +26,14 @@ keep_alive()  #Lance le serveur web pour maintenir le bot actif
 
 dir = "Emile"
 codir = "Xavier"
-gestionbot = "Nathanael"
+gestionbot = "Secrétaire"
 secretaire = "Nathanael"
 dirphoto = "Julia"
 codirphoto = "Valentine"
 dirjournal = "Jordan"
 codirjournal = "Alan"
-dirprod = "Akram"
-dirDJ = "Briac"
+dirprod = "Libre"
+dirDJ = "Matt"
 codirDJ = "Alban"
 
 #############################
@@ -108,7 +108,7 @@ class OdjView(discord.ui.View):
                      style=discord.ButtonStyle.primary)
   async def show_odj(self, interaction: discord.Interaction,
                      button: discord.ui.Button):
-    url = "https://mensuel.framapad.org/p/q13ZD0X0OO7ySG6xc5q8/export/txt"
+    url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
     response = requests.get(url)
 
     if response.status_code != 200:
@@ -140,13 +140,14 @@ class OdjView(discord.ui.View):
     message = f"*{first_line}**\n{extracted_text}"
 
     await interaction.response.send_message(content=f'''📄 **Ordre du jour :**
-**➡️ Pour ajouter un point :** [Clique ici](https://mensuel.framapad.org/p/q13ZD0X0OO7ySG6xc5q8)
+**➡️ Pour ajouter un point :** [Clique ici](https://mensuel.framapad.org/p/Reunion_Exutoire)
 ```{message}```''',
                                             ephemeral=True)
 
 
 # Commande classique avec bouton
-@bot.command()
+@bot.command(help="SVP ne pas spammez, que pour secrétaire!",
+             description="Genere le message pour l'annonce des réunions.")
 async def odj(ctx):
   await ctx.message.delete()
   jeudi = get_next_thursday_fr()
@@ -155,8 +156,8 @@ async def odj(ctx):
 
 🚨 **Réunion hebdomadaire** 🚨  
 📆 **Date :** {jeudi}   
-🕙 **Heure :** 17h    
-📍 **Salle :** Salle de verre / Salle AEETS / Autres (Selon dispo)  
+🕙 **Heure :** 17h30    
+📍 **Salle :** Salle D-2026 (ou autres selon dispo)  
 👥 : @everyone  
 📝 Ordre du jour : Cliquez sur le bouton ci-dessous.  
 Réagissez avec ✅ si vous serez présent, ❌ si non présent et 💻 si à distance.
@@ -174,13 +175,15 @@ Passez une agréable journée ☀️""",
 ###### SONDAGE DISPO RENCONTRE #######
 ######################################
 
+# Non utilisé pour le moment
 
-@bot.command()
+@bot.command(help="Sondage pour dispo réunion.",
+             description="Genere le sondage pour capter les dispos pour les réunions.")
 async def dispo(ctx):
   await ctx.message.delete()
   options = [
-      "1️⃣ Lundi - 17h", "2️⃣ Mardi - 17h", "3️⃣ Mercredi - 17h",
-      "4️⃣ Jeudi - 17h", "5️⃣ Vendredi - 17h", "6️⃣ Week-end - À définir"
+      "1️⃣ Lundi - 17h30", "2️⃣ Mardi - 17h30", "3️⃣ Mercredi - 17h30",
+      "4️⃣ Jeudi - 17h30", "5️⃣ Vendredi - 17h30", "6️⃣ Week-end - À définir"
   ]
 
   # Crée le message du sondage
@@ -215,8 +218,8 @@ async def info(interaction: discord.Interaction):
                  f"🗞️ **Directeur journal** : {dirjournal}\n"
                  f"📰 **Co-directeur journal** : {codirjournal}\n"
                  f"💽 **Directeur production** : {dirprod}\n\n"
-                 "🎙️ Le pôle podcast est en standby.\n"
-                 "📢 Communication auto-gérée entre pôles.")
+                 "🎙️ Le pôle podcast va sûrement repartir.\n"
+                 "📢 Communication auto-gérée entre pôles ou le pôle va renaître.")
 
   footer_text = f"❓ Pour toutes questions, demande sur le #general ou ping @{gestionbot}. Merci!"
 
@@ -236,7 +239,7 @@ async def info(interaction: discord.Interaction):
 
 @bot.tree.command(name="resreu", description="Affiche le résumé de la réunion")
 async def resume(interaction: discord.Interaction):
-  url = "https://mensuel.framapad.org/p/q13ZD0X0OO7ySG6xc5q8/export/txt"
+  url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
   response = requests.get(url)
 
   if response.status_code != 200:
@@ -279,7 +282,8 @@ async def resume(interaction: discord.Interaction):
 ###### FONCTIONS RAPPELS PÔLES ###########
 ##########################################
 '''#Rappels template
-@bot.command()
+@bot.command(help="Message d'aide.",
+             description="Desc.")
 async def rappel(ctx):
   await ctx.message.delete()
 
@@ -291,7 +295,8 @@ Merci à tous pour votre participation 🙌""")'''
 
 
 #Rappels depots photos
-@bot.command()
+@bot.command(help="Rappelez aux photographe de déposer leur photos.",
+             description="Rappel avec lien sharepoint.")
 async def rappelphoto(ctx):
   await ctx.message.delete()
 
@@ -308,24 +313,26 @@ Merci à tous pour votre participation 🙌""")
 
 
 #Rappels dj
-@bot.command()
+@bot.command(help="Rappelez aux DJs qu'un évent arrive.",
+             description="Rappel dj avec indication case verte à cocher.")
 async def rappeldj(ctx):
   await ctx.message.delete()
 
   await ctx.send("""🎛️ **Rappel DJ**  
 @DJ 
 Salut tout le monde, on a un party de prévu bientôt!
-**Si t'es dispo**, réagis avec ✅ sur l'événement correspondant dans #évènements-à-venir.
+**Si t'es dispo**, réagis avec ✅ sur l'événement correspondant dans #évènements-à-venir-dj.
 Merci à tous pour votre participation 🙌""")
 
 
-@bot.command()
+@bot.command(help="Rappelez qu'il y a une réunion.",
+             description="Rappel avec ping de everyone.")
 async def rappelreu(ctx):
   await ctx.message.delete()
 
   await ctx.send("""⚠️**==[Rappel reunion]==**⚠️\n
-@everyone 
-Salut tout le monde, pour rappel rencontre de club ce **jeudi à 17h.**
+||@everyone|| 
+Salut tout le monde, pour rappel rencontre de club ce **jeudi à 17h30.**
 Si tu l'as pas déjà fait, hésites pas à réagir au message :arrow_up: 
 Merci à tous pour votre participation 🙌""")
 
@@ -360,6 +367,8 @@ async def partageson(interaction: discord.Interaction, url: str):
 ###########################################
 ###### SURVEILLANCE DES EMPRUNTS ##########
 ###########################################
+
+#En développement - pas sur qu'il y aura une version finale
 
 @bot.event
 async def on_message(message):
@@ -432,7 +441,7 @@ async def makepdf(interaction: discord.Interaction):
   await interaction.response.send_modal(modal)
 
 
-##NE PAS SUPPRIMER##
+##NE PAS SUPPRIMER CE QU'IL Y A CI-DESSOUS##
 
 
 @bot.event
