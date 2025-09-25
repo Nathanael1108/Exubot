@@ -1,6 +1,6 @@
 #################################
 ############ EXUBOT #############
-######### Version 0.5 ###########
+######### Version 0.5a ##########
 ###### Maintenue par Nate #######
 #################################
 
@@ -336,7 +336,7 @@ Merci à tous pour votre participation 🙌""")'''
 #Rappels resume de reu
 @bot.command(help="Informe que le resume de reunion est dispo.",
              description="Informe avec un piti everyone.")
-async def rappel(ctx):
+async def resumereudispo(ctx):
   await ctx.message.delete()
 
   await ctx.send("""**Résumé de réunion disponible!**  
@@ -365,7 +365,7 @@ Merci à tous pour votre participation 🙌""")
 #Rappels nouvelles prestas photo
 @bot.command(help="Informer les photographes des nouvelles prestas.",
              description="Informe que des nouvelles prestas sont la.")
-async def rappel(ctx):
+async def rappelpresta(ctx):
   await ctx.message.delete()
 
   await ctx.send("""📷 **Nouvelle(s) prestas!**  
