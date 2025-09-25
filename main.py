@@ -1,6 +1,6 @@
 #################################
 ############ EXUBOT #############
-######### Version 0.4 ###########
+######### Version 0.5 ###########
 ###### Maintenue par Nate #######
 #################################
 
@@ -30,8 +30,8 @@ gestionbot = "Secrétaire"
 secretaire = "Nathanael"
 dirphoto = "Julia"
 codirphoto = "Valentine"
-dirjournal = "Jordan"
-codirjournal = "Alan"
+dirjournal = "Alan"
+codirjournal = "Pierre"
 dirprod = "Libre"
 dirDJ = "Matt"
 codirDJ = "Alban"
@@ -186,7 +186,7 @@ async def odj(ctx):
 🚨 **Réunion hebdomadaire** 🚨  
 📆 **Date :** {jeudi}   
 🕙 **Heure :** 17h30    
-📍 **Salle :** Salle D-2026 (ou autres selon dispo)  
+📍 **Salle :** Salle D-2032  
 👥 : @everyone  
 📝 Ordre du jour : Cliquez sur le bouton ci-dessous.  
 Réagissez avec ✅ si vous serez présent, ❌ si non présent et 💻 si à distance.
@@ -262,7 +262,7 @@ async def info(interaction: discord.Interaction):
 
 #Fonction du lien d'invit du messenger
 
-lien_mess = "https://www.google.com/" #mettre le bon lien ICI
+lien_mess = "https://www.messenger.com/cm/AbYcqd3SvUQBmAtq/?send_source=cm%3Adirect_invite_group" #Lien du messenger, a update si expiré
 
 # Slash commande qui envoie un lien en ephemeral
 @bot.tree.command(name="messenger", description="Donne l'invit du messenger en privé (ephemeral).")
@@ -333,6 +333,17 @@ Salut tout le monde, [SAISIR TEXTE ICI]!
 [SAISIR TEXTE ICI]
 Merci à tous pour votre participation 🙌""")'''
 
+#Rappels resume de reu
+@bot.command(help="Informe que le resume de reunion est dispo.",
+             description="Informe avec un piti everyone.")
+async def rappel(ctx):
+  await ctx.message.delete()
+
+  await ctx.send("""**Résumé de réunion disponible!**  
+@everyone 
+Salut tout le monde, le résumé de notre dernière réunion est disponible!
+Tu peux le retrouver ici :arrow_right: #résumé-réunion.
+Bonne journée!""")
 
 #Rappels depots photos
 @bot.command(help="Rappelez aux photographe de déposer leur photos.",
@@ -351,6 +362,19 @@ Salut tout le monde !
 
 Merci à tous pour votre participation 🙌""")
 
+#Rappels nouvelles prestas photo
+@bot.command(help="Informer les photographes des nouvelles prestas.",
+             description="Informe que des nouvelles prestas sont la.")
+async def rappel(ctx):
+  await ctx.message.delete()
+
+  await ctx.send("""📷 **Nouvelle(s) prestas!**  
+@Photo/Vidéo
+Salut tout le monde, on a une ou plusieurs presta(s) de prévue bientôt!
+
+**Si t'es dispo et intéressé**, réagis avec ✅ sur l'événement correspondant dans #évènements-à-venir-photo.
+Merci à tous pour votre participation 🙌""")
+
 
 #Rappels dj
 @bot.command(help="Rappelez aux DJs qu'un évent arrive.",
@@ -360,8 +384,9 @@ async def rappeldj(ctx):
 
   await ctx.send("""🎛️ **Rappel DJ**  
 @DJ 
-Salut tout le monde, on a un party de prévu bientôt!
-**Si t'es dispo**, réagis avec ✅ sur l'événement correspondant dans #évènements-à-venir-dj.
+Salut tout le monde, on a un ou plusieurs event(s) de prévu bientôt!
+
+**Si t'es dispo et intéressé**, réagis avec ✅ sur l'événement correspondant dans #évènements-à-venir-dj.
 Merci à tous pour votre participation 🙌""")
 
 
