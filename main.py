@@ -1,6 +1,6 @@
 #################################
 ############ EXUBOT #############
-######### Version 0.5a ##########
+######### Version 0.5b ##########
 ###### Maintenue par Nate #######
 #################################
 
@@ -186,7 +186,7 @@ async def odj(ctx):
 🚨 **Réunion hebdomadaire** 🚨  
 📆 **Date :** {jeudi}   
 🕙 **Heure :** 17h30    
-📍 **Salle :** Salle D-2032  
+📍 **Salle :** Salle D-3012 (ou autres si petit nombre)  
 👥 : @everyone  
 📝 Ordre du jour : Cliquez sur le bouton ci-dessous.  
 Réagissez avec ✅ si vous serez présent, ❌ si non présent et 💻 si à distance.
