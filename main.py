@@ -1,8 +1,8 @@
-#################################
-############ EXUBOT #############
-######### Version 0.5b ##########
-###### Maintenue par Nate #######
-#################################
+################################
+############ EXUBOT ############
+######### Version 0.6 ##########
+###### Maintenue par Nate ######
+################################
 
 #################################
 ###### IMPORT DES MODULES #######
@@ -198,6 +198,60 @@ Passez une agréable journée ☀️""",
   await msg.add_reaction("✅")
   await msg.add_reaction("❌")
   await msg.add_reaction("💻")
+
+#Envoi ordre du jour en mp a celui qui demande
+
+@bot.command(name="odjmp")
+async def odjmp(ctx):
+    url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        content = response.text
+        lines = content.splitlines()
+
+        inside_block = False
+        extracted_lines = []
+
+        for line in lines:
+            if "—————BEGIN——————" in line:
+                inside_block = True
+                continue
+            elif "—————STOP——————" in line:
+                break
+            if inside_block:
+                extracted_lines.append(line)
+
+        texte = "\n".join(extracted_lines).strip()
+
+        if texte:
+            # Tronquer si trop long
+            if len(texte) > 1900:
+                texte = texte[:1900] + "\n\n⚠️ (tronqué pour respecter la limite Discord)"
+
+            try:
+                await ctx.author.send(texte)
+            except:
+                pass  # on ignore s'il ne peut pas envoyer de MP
+
+# Annonce de la reunion pour le messenger
+
+@bot.tree.command(name="odjmess", description="Annonce formatée pour Messenger")
+async def odjmess(interaction: discord.Interaction):
+    jeudi = get_next_thursday_fr()
+
+    message_messenger = (
+        f"Bonjour tout le monde :\n\n"
+        f"🚨 *Réunion hebdomadaire* 🚨\n"
+        f"📆 *Date :* {jeudi}\n"
+        f"🕙 *Heure :* 17h30\n"
+        f"📍 *Salle :* D-3012\n"
+        f"👥 *@everyone*\n"
+        f"📝 *Ordre du jour :* S'en vient à la suite de ce message.\n"
+        f"Réagissez avec 👍 si vous serez présent, 👎 si non présent et 💻 si à distance.\n\n"
+        f"*Note :* La réunion est maintenue si au moins 3 personnes sont présentes.\n\n"
+        f"Passez une agréable journée ☀️"
+    )
 
 
 ######################################
