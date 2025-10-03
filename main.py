@@ -203,6 +203,7 @@ Passez une agréable journée ☀️""",
 
 @bot.command(name="odjmp")
 async def odjmp(ctx):
+    await ctx.message.delete()
     url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
     response = requests.get(url)
 
@@ -238,6 +239,7 @@ async def odjmp(ctx):
 
 @bot.tree.command(name="odjmess", description="Annonce formatée pour Messenger")
 async def odjmess(interaction: discord.Interaction):
+    await ctx.message.delete()
     jeudi = get_next_thursday_fr()
 
     message_messenger = (
@@ -251,6 +253,10 @@ async def odjmess(interaction: discord.Interaction):
         f"Réagissez avec 👍 si vous serez présent, 👎 si non présent et 💻 si à distance.\n\n"
         f"*Note :* La réunion est maintenue si au moins 3 personnes sont présentes.\n\n"
         f"Passez une agréable journée ☀️"
+    )
+await interaction.response.send_message(
+        content=message_messenger,
+        ephemeral=True
     )
 
 
