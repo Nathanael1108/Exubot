@@ -238,7 +238,7 @@ async def odjmp(ctx):
 # Annonce de la reunion pour le messenger
 
 @bot.tree.command(name="odjmess", description="Annonce formatée pour Messenger")
-async def odjmess(interaction: discord.Interaction):
+async def odjmess(ctx):
     await ctx.message.delete()
     jeudi = get_next_thursday_fr()
 
@@ -250,11 +250,12 @@ async def odjmess(interaction: discord.Interaction):
         f"📍 *Salle :* D-3012\n"
         f"👥 *@everyone*\n"
         f"📝 *Ordre du jour :* S'en vient à la suite de ce message.\n"
-        f"Réagissez avec 👍 si vous serez présent, 👎 si non présent et 💻 si à distance.\n\n"
+        f"Réagissez avec ✅ si vous serez présent, ❌ si non présent et 💻 si à distance.\n\n"
         f"*Note :* La réunion est maintenue si au moins 3 personnes sont présentes.\n\n"
         f"Passez une agréable journée ☀️"
     )
-await interaction.response.send_message(
+
+    await interaction.response.send_message(
         content=message_messenger,
         ephemeral=True
     )
