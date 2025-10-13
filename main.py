@@ -238,8 +238,7 @@ async def odjmp(ctx):
 # Annonce de la reunion pour le messenger
 
 @bot.tree.command(name="odjmess", description="Annonce formatée pour Messenger")
-async def odjmess(ctx):
-    await ctx.message.delete()
+async def odjmess(interaction: discord.Interaction):
     jeudi = get_next_thursday_fr()
 
     message_messenger = (
@@ -248,8 +247,8 @@ async def odjmess(ctx):
         f"📆 *Date :* {jeudi}\n"
         f"🕙 *Heure :* 17h30\n"
         f"📍 *Salle :* D-3012\n"
-        f"👥 *@everyone*\n"
-        f"📝 *Ordre du jour :* S'en vient à la suite de ce message.\n"
+        f"👥 *@tout le monde*\n"
+        f"📝 *Ordre du jour :* https://mensuel.framapad.org/p/Reunion_Exutoire\n"
         f"Réagissez avec ✅ si vous serez présent, ❌ si non présent et 💻 si à distance.\n\n"
         f"*Note :* La réunion est maintenue si au moins 3 personnes sont présentes.\n\n"
         f"Passez une agréable journée ☀️"
