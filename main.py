@@ -1,6 +1,6 @@
 ################################
 ############ EXUBOT ############
-######### Version 0.6 ##########
+######### Version 0.7 ##########
 ###### Maintenue par Nate ######
 ################################
 
@@ -110,18 +110,17 @@ async def presentation(ctx):
 ########################################
 
 
-def get_next_thursday_fr():
-  today = datetime.today()
-  days_ahead = (3 - today.weekday() + 7) % 7
-  if days_ahead == 0:
-    days_ahead = 7  # On saute au jeudi suivant si on est jeudi
-  next_thursday = today + timedelta(days=days_ahead)
-  jour = jours_fr[next_thursday.weekday()]
-  jour_num = next_thursday.day
-  mois = mois_fr[next_thursday.month - 1]
+def get_next_wednesday_fr():
+    today = datetime.today()
+    days_ahead = (2 - today.weekday() + 7) % 7  # 2 = mercredi
+    if days_ahead == 0:
+        days_ahead = 7  # On saute au mercredi suivant si on est déjà mercredi
+    next_wednesday = today + timedelta(days=days_ahead)
+    jour = jours_fr[next_wednesday.weekday()]
+    jour_num = next_wednesday.day
+    mois = mois_fr[next_wednesday.month - 1]
 
-  return f"{jour} {jour_num} {mois}"
-
+    return f"{jour} {jour_num} {mois}"
 
 ###############################################
 ###### CREATION D'ANNONCE ORDRE DU JOUR #######
@@ -130,61 +129,63 @@ def get_next_thursday_fr():
 
 class OdjView(discord.ui.View):
 
-  def __init__(self):
-    super().__init__(timeout=None)
+    def __init__(self):
+        super().__init__(timeout=None)
 
-  @discord.ui.button(label="📋 Voir l'ordre du jour",
-                     style=discord.ButtonStyle.primary)
-  async def show_odj(self, interaction: discord.Interaction,
-                     button: discord.ui.Button):
-    url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
-    response = requests.get(url)
+    @discord.ui.button(label="📋 Voir l'ordre du jour", style=discord.ButtonStyle.primary)
+    async def show_odj(self, interaction: discord.Interaction, button: discord.ui.Button):
+        url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
+        response = requests.get(url)
 
-    if response.status_code != 200:
-      await interaction.response.send_message(
-          "❌ Impossible de récupérer l'ordre du jour.", ephemeral=True)
-      return
+        if response.status_code != 200:
+            await interaction.response.send_message(
+                "❌ Impossible de récupérer l'ordre du jour.", ephemeral=True
+            )
+            return
 
-    content = response.text
-    lines = content.splitlines()
+        content = response.text
+        lines = content.splitlines()
 
-    inside_block = False
-    extracted_lines = []
+        inside_block = False
+        extracted_lines = []
 
-    for line in lines:
-      if "—————BEGIN——————" in line:
-        inside_block = True
-        continue
-      elif "—————STOP——————" in line:
-        break
-      if inside_block:
-        extracted_lines.append(line)
+        for line in lines:
+            if "—————BEGIN——————" in line:
+                inside_block = True
+                continue
+            elif "—————STOP——————" in line:
+                break
+            if inside_block:
+                extracted_lines.append(line)
 
-    # Affichage du texte
-    extracted_text = "\n".join(extracted_lines).strip()
-    if len(extracted_text) > 1900:
-      extracted_text = extracted_text[:1900]
+        # Nettoyage et limitation du texte
+        extracted_text = "\n".join(extracted_lines).strip()
+        if len(extracted_text) > 1900:
+            extracted_text = extracted_text[:1900] + "\n[...]"
 
-    first_line = lines[0] if len(lines) > 0 else ""
-    message = f"*{first_line}**\n{extracted_text}"
+        first_line = lines[0].strip() if len(lines) > 0 else ""
+        message = f"**{first_line}**\n{extracted_text}"
 
-    await interaction.response.send_message(content=f'''📄 **Ordre du jour :**
-**➡️ Pour ajouter un point :** [Clique ici](https://mensuel.framapad.org/p/Reunion_Exutoire)
-```{message}```''',
-                                            ephemeral=True)
-
+        await interaction.response.send_message(
+            content=(
+                "📄 **Ordre du jour :**\n"
+                "**➡️ Pour ajouter un point :** https://mensuel.framapad.org/p/Reunion_Exutoire\n\n"
+                f"```{message}```"
+            ),
+            ephemeral=True
+        )
 
 # Commande classique avec bouton
 @bot.command(help="SVP ne pas spammez, que pour secrétaire!",
              description="Genere le message pour l'annonce des réunions.")
 async def odj(ctx):
   await ctx.message.delete()
-  jeudi = get_next_thursday_fr()
+  mercredi = get_next_wednesday_fr()
 
   msg = await ctx.send(f"""Bonjour tout le monde :
 
 🚨 **Réunion hebdomadaire** 🚨  
-📆 **Date :** {jeudi}   
+📆 **Date :** {mercredi}   
 🕙 **Heure :** 17h30    
 📍 **Salle :** Salle D-3012 (ou autres si petit nombre)  
 👥 : @everyone  
@@ -239,17 +240,17 @@ async def odjmp(ctx):
 
 @bot.tree.command(name="odjmess", description="Annonce formatée pour Messenger")
 async def odjmess(interaction: discord.Interaction):
-    jeudi = get_next_thursday_fr()
+    mercredi = get_next_wednesday_fr()
 
     message_messenger = (
         f"Bonjour tout le monde :\n\n"
         f"🚨 *Réunion hebdomadaire* 🚨\n"
-        f"📆 *Date :* {jeudi}\n"
+        f"📆 *Date :* {mercredi}\n"
         f"🕙 *Heure :* 17h30\n"
         f"📍 *Salle :* D-3012\n"
         f"👥 *@tout le monde*\n"
         f"📝 *Ordre du jour :* https://mensuel.framapad.org/p/Reunion_Exutoire\n"
-        f"Réagissez avec ✅ si vous serez présent, ❌ si non présent et 💻 si à distance.\n\n"
+        f"Réagissez avec 👍 si vous serez présent, 👎 si non présent.\n\n"
         f"*Note :* La réunion est maintenue si au moins 3 personnes sont présentes.\n\n"
         f"Passez une agréable journée ☀️"
     )
