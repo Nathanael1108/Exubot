@@ -127,6 +127,10 @@ def get_next_wednesday_fr():
 ###############################################
 
 
+import discord
+import requests
+import asyncio
+
 class OdjView(discord.ui.View):
 
     def __init__(self):
@@ -134,13 +138,22 @@ class OdjView(discord.ui.View):
 
     @discord.ui.button(label="📋 Voir l'ordre du jour", style=discord.ButtonStyle.primary)
     async def show_odj(self, interaction: discord.Interaction, button: discord.ui.Button):
-        url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
-        response = requests.get(url)
+        await interaction.response.defer(ephemeral=True)  # ⚙️ On "réserve" la réponse (empêche l'erreur)
 
-        if response.status_code != 200:
-            await interaction.response.send_message(
-                "❌ Impossible de récupérer l'ordre du jour.", ephemeral=True
-            )
+        # Récupération du pad
+        url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
+
+        # requests.get peut bloquer → on le fait dans un thread
+        def fetch():
+            try:
+                return requests.get(url, timeout=5)
+            except Exception:
+                return None
+
+        response = await asyncio.to_thread(fetch)
+
+        if not response or response.status_code != 200:
+            await interaction.followup.send("❌ Impossible de récupérer l'ordre du jour.", ephemeral=True)
             return
 
         content = response.text
@@ -158,7 +171,6 @@ class OdjView(discord.ui.View):
             if inside_block:
                 extracted_lines.append(line)
 
-        # Nettoyage et limitation du texte
         extracted_text = "\n".join(extracted_lines).strip()
         if len(extracted_text) > 1900:
             extracted_text = extracted_text[:1900] + "\n[...]"
@@ -166,7 +178,7 @@ class OdjView(discord.ui.View):
         first_line = lines[0].strip() if len(lines) > 0 else ""
         message = f"**{first_line}**\n{extracted_text}"
 
-        await interaction.response.send_message(
+        await interaction.followup.send(
             content=(
                 "📄 **Ordre du jour :**\n"
                 "**➡️ Pour ajouter un point :** https://mensuel.framapad.org/p/Reunion_Exutoire\n\n"
