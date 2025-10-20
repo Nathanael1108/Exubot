@@ -16,6 +16,7 @@ import requests
 from datetime import datetime, timedelta
 from keep_alive import keep_alive
 from fpdf import FPDF
+import asyncio
 import io
 
 keep_alive()  #Lance le serveur web pour maintenir le bot actif
