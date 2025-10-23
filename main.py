@@ -133,60 +133,41 @@ import requests
 import asyncio
 
 class OdjView(discord.ui.View):
+  def __init__(self):
+    super().__init__(timeout=None)
+  @discord.ui.button(label="📋 Voir l'ordre du jour",
+                     style=discord.ButtonStyle.primary)
+  async def show_odj(self, interaction: discord.Interaction,
+                     button: discord.ui.Button):
+    url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
+    response = requests.get(url)
+    if response.status_code != 200:
+      await interaction.response.send_message(
+          "❌ Impossible de récupérer l'ordre du jour.", ephemeral=True)
+      return
+    content = response.text
+    lines = content.splitlines()
+    inside_block = False
+    extracted_lines = []
+    for line in lines:
+      if "—————BEGIN——————" in line:
+        inside_block = True
+        continue
+      elif "—————STOP——————" in line:
+        break
+      if inside_block:
+        extracted_lines.append(line)
+    # Affichage du texte
+    extracted_text = "\n".join(extracted_lines).strip()
+    if len(extracted_text) > 1900:
+      extracted_text = extracted_text[:1900]
+    first_line = lines[0] if len(lines) > 0 else ""
+    message = f"*{first_line}**\n{extracted_text}"
+    await interaction.response.send_message(content=f'''📄 **Ordre du jour :**
 
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(label="📋 Voir l'ordre du jour", style=discord.ButtonStyle.primary)
-    async def show_odj(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)  # ⚙️ On "réserve" la réponse (empêche l'erreur)
-
-        # Récupération du pad
-        url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
-
-        # requests.get peut bloquer → on le fait dans un thread
-        def fetch():
-            try:
-                return requests.get(url, timeout=5)
-            except Exception:
-                return None
-
-        response = await asyncio.to_thread(fetch)
-
-        if not response or response.status_code != 200:
-            await interaction.followup.send("❌ Impossible de récupérer l'ordre du jour.", ephemeral=True)
-            return
-
-        content = response.text
-        lines = content.splitlines()
-
-        inside_block = False
-        extracted_lines = []
-
-        for line in lines:
-            if "—————BEGIN——————" in line:
-                inside_block = True
-                continue
-            elif "—————STOP——————" in line:
-                break
-            if inside_block:
-                extracted_lines.append(line)
-
-        extracted_text = "\n".join(extracted_lines).strip()
-        if len(extracted_text) > 1900:
-            extracted_text = extracted_text[:1900] + "\n[...]"
-
-        first_line = lines[0].strip() if len(lines) > 0 else ""
-        message = f"**{first_line}**\n{extracted_text}"
-
-        await interaction.followup.send(
-            content=(
-                "📄 **Ordre du jour :**\n"
-                "**➡️ Pour ajouter un point :** https://mensuel.framapad.org/p/Reunion_Exutoire\n\n"
-                f"```{message}```"
-            ),
-            ephemeral=True
-        )
+**➡️ Pour ajouter un point :** [Clique ici](https://mensuel.framapad.org/p/Reunion_Exutoire)
+```{message}```''',
+                                            ephemeral=True)
 
 # Commande classique avec bouton
 @bot.command(help="SVP ne pas spammez, que pour secrétaire!",
@@ -199,7 +180,7 @@ async def odj(ctx):
 
 🚨 **Réunion hebdomadaire** 🚨  
 📆 **Date :** {mercredi}   
-🕙 **Heure :** 17h30    
+🕙 **Heure :** 17h15    
 📍 **Salle :** Salle D-3012 (ou autres si petit nombre)  
 👥 : @everyone  
 📝 Ordre du jour : Cliquez sur le bouton ci-dessous.  
@@ -258,13 +239,13 @@ async def odjmess(interaction: discord.Interaction):
     message_messenger = (
         f"Bonjour tout le monde :\n\n"
         f"🚨 *Réunion hebdomadaire* 🚨\n"
-        f"📆 *Date :* {mercredi}\n"
-        f"🕙 *Heure :* 17h30\n"
-        f"📍 *Salle :* D-3012\n"
+        f"📆 *Date : {mercredi}\n"
+        f"🕙 *Heure : 17h15\n"
+        f"📍 *Salle : D-3012\n"
         f"👥 *@tout le monde*\n"
-        f"📝 *Ordre du jour :* https://mensuel.framapad.org/p/Reunion_Exutoire\n"
+        f"📝 *Ordre du jour : https://mensuel.framapad.org/p/Reunion_Exutoire\n"
         f"Réagissez avec 👍 si vous serez présent, 👎 si non présent.\n\n"
-        f"*Note :* La réunion est maintenue si au moins 3 personnes sont présentes.\n\n"
+        f"*Note : La réunion est maintenue si au moins 3 personnes sont présentes.\n\n"
         f"Passez une agréable journée ☀️"
     )
 
