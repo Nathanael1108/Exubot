@@ -133,41 +133,21 @@ import requests
 import asyncio
 
 class OdjView(discord.ui.View):
-  def __init__(self):
-    super().__init__(timeout=None)
-  @discord.ui.button(label="📋 Voir l'ordre du jour",
-                     style=discord.ButtonStyle.primary)
-  async def show_odj(self, interaction: discord.Interaction,
-                     button: discord.ui.Button):
-    url = "https://mensuel.framapad.org/p/Reunion_Exutoire/export/txt"
-    response = requests.get(url)
-    if response.status_code != 200:
-      await interaction.response.send_message(
-          "❌ Impossible de récupérer l'ordre du jour.", ephemeral=True)
-      return
-    content = response.text
-    lines = content.splitlines()
-    inside_block = False
-    extracted_lines = []
-    for line in lines:
-      if "—————BEGIN——————" in line:
-        inside_block = True
-        continue
-      elif "—————STOP——————" in line:
-        break
-      if inside_block:
-        extracted_lines.append(line)
-    # Affichage du texte
-    extracted_text = "\n".join(extracted_lines).strip()
-    if len(extracted_text) > 1900:
-      extracted_text = extracted_text[:1900]
-    first_line = lines[0] if len(lines) > 0 else ""
-    message = f"*{first_line}**\n{extracted_text}"
-    await interaction.response.send_message(content=f'''📄 **Ordre du jour :**
+    def __init__(self):
+        super().__init__(timeout=None)
 
-**➡️ Pour ajouter un point :** [Clique ici](https://mensuel.framapad.org/p/Reunion_Exutoire)
-```{message}```''',
-                                            ephemeral=True)
+    @discord.ui.button(label="📋 Voir l'ordre du jour",
+                       style=discord.ButtonStyle.primary)
+    async def show_odj(self, interaction: discord.Interaction,
+                       button: discord.ui.Button):
+        await interaction.response.send_message(
+            content=(
+                "**➡️  Voilà le lien :** [Clique ici](https://mensuel.framapad.org/p/Reunion_Exutoire)\n\n"
+                "💡 *PS : Si ça ressemble à un sapin de Noël, clique sur l'engrenage en haut à droite et désactive* "
+                "**Surlignage par auteur**. Tu peux ajouter les points que tu veux discuter aussi!"
+            ),
+            ephemeral=True
+        )
 
 # Commande classique avec bouton
 @bot.command(help="SVP ne pas spammez, que pour secrétaire!",
