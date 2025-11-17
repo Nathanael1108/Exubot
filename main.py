@@ -1,6 +1,6 @@
 ################################
 ############ EXUBOT ############
-######### Version 0.7 ##########
+######### Version 0.8 ##########
 ###### Maintenue par Nate ######
 ################################
 
@@ -161,7 +161,7 @@ async def odj(ctx):
 🚨 **Réunion hebdomadaire** 🚨  
 📆 **Date :** {mercredi}   
 🕙 **Heure :** 17h15    
-📍 **Salle :** Salle D-3012 (ou autres si petit nombre)  
+📍 **Salle :** Salle D-4025 (ou autres si petit nombre)  
 👥 : @everyone  
 📝 Ordre du jour : Cliquez sur le bouton ci-dessous.  
 Réagissez avec ✅ si vous serez présent, ❌ si non présent et 💻 si à distance.
@@ -221,7 +221,7 @@ async def odjmess(interaction: discord.Interaction):
         f"🚨 *Réunion hebdomadaire* 🚨\n"
         f"📆 *Date : {mercredi}\n"
         f"🕙 *Heure : 17h15\n"
-        f"📍 *Salle : D-3012\n"
+        f"📍 *Salle : D-4025\n"
         f"👥 *@tout le monde*\n"
         f"📝 *Ordre du jour : https://mensuel.framapad.org/p/Reunion_Exutoire\n"
         f"Réagissez avec 👍 si vous serez présent, 👎 si non présent.\n\n"
