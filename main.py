@@ -1,6 +1,6 @@
 ################################
 ############ EXUBOT ############
-######### Version 0.8 ##########
+######### Version 0.9 ##########
 ###### Maintenue par Nate ######
 ################################
 
@@ -35,7 +35,9 @@ dirjournal = "Alan"
 codirjournal = "Pierre"
 dirprod = "Libre"
 dirDJ = "Matt"
-codirDJ = "Alban"
+codirDJ = "Manu / Akli"
+dirpodcast = "Maxence"
+codirpodcast = "Clémence"
 
 #############################
 ###### INITIALISATION #######
@@ -161,7 +163,7 @@ async def odj(ctx):
 🚨 **Réunion hebdomadaire** 🚨  
 📆 **Date :** {mercredi}   
 🕙 **Heure :** 17h15    
-📍 **Salle :** Salle D-4025 (ou autres si petit nombre)  
+📍 **Salle :**  Préciser ci-dessous.
 👥 : @everyone  
 📝 Ordre du jour : Cliquez sur le bouton ci-dessous.  
 Réagissez avec ✅ si vous serez présent, ❌ si non présent et 💻 si à distance.
@@ -221,7 +223,7 @@ async def odjmess(interaction: discord.Interaction):
         f"🚨 *Réunion hebdomadaire* 🚨\n"
         f"📆 *Date : {mercredi}\n"
         f"🕙 *Heure : 17h15\n"
-        f"📍 *Salle : D-4025\n"
+        f"📍 *Salle : Preciser ci-dessous.\n"
         f"👥 *@tout le monde*\n"
         f"📝 *Ordre du jour : https://mensuel.framapad.org/p/Reunion_Exutoire\n"
         f"Réagissez avec 👍 si vous serez présent, 👎 si non présent.\n\n"
@@ -282,8 +284,9 @@ async def info(interaction: discord.Interaction):
                  f"🗞️ **Directeur journal** : {dirjournal}\n"
                  f"📰 **Co-directeur journal** : {codirjournal}\n"
                  f"💽 **Directeur production** : {dirprod}\n\n"
-                 "🎙️ Le pôle podcast va sûrement repartir.\n"
-                 "📢 Communication auto-gérée entre pôles ou le pôle va renaître.")
+                 f"🎤 **Directeur podcast** : {dirpodcast}\n\n"
+                f"🎙️ **Co-directeur podcast** : {codirpodcast}\n\n" 
+                 "📢 Communication auto-gérée entre pôles.")
 
   footer_text = f"❓ Pour toutes questions, demande sur le #general ou ping @{gestionbot}. Merci!"
 
