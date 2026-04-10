@@ -25,17 +25,17 @@ keep_alive()  #Lance le serveur web pour maintenir le bot actif
 ###### NOMS DIRECTIONS #######
 ##############################
 
-dir = "Emile"
-codir = "Xavier"
-gestionbot = "Secrétaire"
-secretaire = "Nathanael"
-dirphoto = "Julia"
-codirphoto = "Valentine"
-dirjournal = "Alan"
-codirjournal = "Pierre"
+dir = "Lilou"
+codir = "Loïc"
+gestionbot = "Nate"
+secretaire = "Libre"
+dirphoto = "Mathis"
+codirphoto = "Théo"
+dirjournal = "Maxime"
+codirjournal = "Solène"
 dirprod = "Libre"
 dirDJ = "Matt"
-codirDJ = "Manu / Akli"
+codirDJ = "Nathanael"
 dirpodcast = "Maxence"
 codirpodcast = "Clémence"
 
