@@ -1,4 +1,4 @@
-```python
+
 ################################
 ############ EXUBOT ############
 ######### Version 1.0 ##########
@@ -371,4 +371,4 @@ async def on_ready():
 
 token = os.environ['TOKEN_BOT']
 bot.run(token)
-```
+
